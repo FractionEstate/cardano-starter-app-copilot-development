@@ -1,4 +1,10 @@
 {
   "name": "Cardano Starter (Local Overrides)",
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {
+      "version": "latest",
+      "rootless": true
+    }
+  },
   "postCreateCommand": "bash -lc 'set -euo pipefail; (command -v corepack >/dev/null 2>&1 && corepack enable && corepack prepare pnpm@9 --activate) || true; (command -v pnpm >/dev/null 2>&1 && pnpm -v) || true; pnpm install || true; bash .devcontainer/scripts/install-aiken.sh'"
 }

@@ -11,16 +11,14 @@
 			"version": "20",
 			"nodeGypDependencies": true
 		},
-		// pnpm package manager
-		"ghcr.io/devcontainers/features/pnpm:1": {
-			"version": "9"
-		},
 		// Rust toolchain for Aiken builds
 		"ghcr.io/devcontainers/features/rust:1": {
 			"version": "latest"
 		},
 		// Docker + Docker Compose inside the container (for Dolos/Kupo/Ogmios)
-		"ghcr.io/devcontainers/features/docker-in-docker:2": {}
+		"ghcr.io/devcontainers/features/docker-in-docker:2": {
+			"rootless": true
+		}
 	},
 	// Forward commonly used ports (Next.js, API, Ogmios, Kupo, Dolos)
 	"forwardPorts": [
@@ -46,7 +44,7 @@
 		}
 	},
 	// After the container is created, ensure pnpm & npx are available, install deps, and install Aiken if missing
-	"postCreateCommand": "bash -lc 'pnpm -v && (command -v npx >/dev/null 2>&1 || npm i -g npx) && npx --version && pnpm install && (command -v aiken >/dev/null 2>&1 || cargo install aiken --locked)'",
+	"postCreateCommand": "bash -lc 'set -euo pipefail; if command -v corepack >/dev/null 2>&1; then corepack enable || true; corepack prepare pnpm@9 --activate || true; fi; if ! command -v pnpm >/dev/null 2>&1; then npm i -g pnpm@9; fi; pnpm -v; pnpm install; bash .devcontainer/scripts/install-aiken.sh'",
 	// Use the non-root user provided by the base image for better file permissions
 	"remoteUser": "vscode"
 }
