@@ -25,7 +25,11 @@ Copy-Item .env.example .env
 pnpm install
 
 # 3) Start node services (Dolos, Ogmios, Kupo)
-cd packages/dolos; docker compose up -d; cd ../..
+# Option A (recommended): via monorepo scripts
+pnpm infra:up
+
+# Option B (manual): run from packages/dolos
+# cd packages/dolos; docker compose up -d; cd ../..
 
 # 4) Build all packages (includes Aiken)
 pnpm run build
@@ -33,6 +37,27 @@ pnpm run build
 # 5) Dev servers (Next.js 3000 + API 3001)
 pnpm run dev
 ```
+
+### Running without Docker (optional)
+
+If you don't want local containers, you can point the backend to hosted providers (e.g., Maestro, Blockfrost, Koios) or a remote Kupmios-compatible endpoint by setting the corresponding environment variables in `.env` and skipping `pnpm infra:up`.
+
+To stop the local infra:
+
+```powershell
+pnpm infra:down
+```
+
+### API quick check
+
+Once the API is running:
+
+```powershell
+# Check Cardano provider readiness and endpoints
+Invoke-WebRequest http://localhost:3001/cardano/status | Select-Object -ExpandProperty Content
+```
+
+This returns a JSON with `ready`, `ogmiosUrl`, and `kupoUrl`. If you’re pointing to remote endpoints via `.env`, Docker isn’t required.
 
 ## Aiken
 

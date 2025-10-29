@@ -6,7 +6,10 @@
     "build": "turbo build",
     "dev": "turbo dev",
     "test": "turbo test",
-    "lint": "turbo lint"
+    "lint": "turbo lint",
+    "infra:up": "pnpm --filter @starter/dolos infra:up",
+    "infra:down": "pnpm --filter @starter/dolos infra:down",
+    "infra:logs": "pnpm --filter @starter/dolos infra:logs"
   },
   "devDependencies": {
     "typescript": "^5.4.0",
