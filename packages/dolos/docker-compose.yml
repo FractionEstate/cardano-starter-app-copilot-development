@@ -1,0 +1,32 @@
+version: "3.8"
+services:
+  dolos:
+    image: ghcr.io/txpipe/dolos:latest
+    container_name: dolos
+    restart: unless-stopped
+    ports:
+      - "50051:50051" # gRPC
+      - "3000:3000" # REST API
+    volumes:
+      - ./data:/data
+    environment:
+      - DOLOS_NETWORK=preprod
+      - DOLOS_DATA_DIR=/data
+
+  ogmios:
+    image: cardanosolutions/ogmios:latest
+    container_name: ogmios
+    restart: unless-stopped
+    ports:
+      - "1337:1337"
+    environment:
+      - OGMIOS_NETWORK=preprod
+
+  kupo:
+    image: cardanosolutions/kupo:latest
+    container_name: kupo
+    restart: unless-stopped
+    ports:
+      - "1442:1442"
+    environment:
+      - KUPO_NETWORK=preprod

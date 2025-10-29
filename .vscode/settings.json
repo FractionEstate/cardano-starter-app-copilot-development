@@ -1,0 +1,72 @@
+{
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "editor.formatOnSave": true,
+  "files.eol": "\n",
+  "editor.tabSize": 2,
+  "eslint.validate": [
+    "javascript",
+    "typescript",
+    "typescriptreact"
+  ],
+  "[typescript]": {
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+  },
+  "github.copilot.chat.codeGeneration.useInstructionFiles": true,
+  "chat.useAgentsMdFile": true,
+  "chat.useNestedAgentsMdFiles": true,
+  "chat.promptFiles": true,
+  "githubPullRequests.codingAgent.uiIntegration": true,
+  "chat.agentSessionsViewLocation": "view",
+  "github.copilot.editor.enableAutoCompletions": true,
+  "github.copilot.enable": {
+    "*": true,
+    "plaintext": false,
+    "markdown": true,
+    "scminput": false
+  },
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit",
+    "source.organizeImports": "explicit"
+  },
+  "files.associations": {
+    "*.md": "markdown",
+    "*.prompt.md": "markdown",
+    "*.chatmode.md": "markdown",
+    "*.instructions.md": "markdown"
+  },
+  "files.exclude": {
+    "**/.git": true,
+    "**/.DS_Store": true,
+    "**/node_modules": true,
+    "**/dist": true,
+    "**/.next": true
+  },
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/dist": true,
+    "**/.next": true,
+    "**/coverage": true
+  },
+  "chat.mcp.serverSampling": {
+    "ai-settings/.vscode/mcp.json: postgresql": {
+      "allowedModels": [
+        "copilot/claude-haiku-4.5",
+        "copilot/claude-opus-41",
+        "copilot/claude-sonnet-4.5",
+        "copilot/gemini-2.5-pro",
+        "copilot/gpt-4-0125-preview",
+        "copilot/gpt-4.1",
+        "copilot/gpt-5",
+        "copilot/gpt-5-codex",
+        "copilot/grok-code-fast-1"
+      ]
+    }
+  }
+}

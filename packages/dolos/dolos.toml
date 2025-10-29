@@ -1,0 +1,3 @@
+[logging]
+max_level = "info"
+include_tokio = false

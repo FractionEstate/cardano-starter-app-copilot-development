@@ -1,0 +1,10 @@
+name = "starter/validators"
+version = "1.0.0"
+author = "your-name"
+
+[repository]
+user = "your-github"
+project = "cardano-starter"
+
+[plutus]
+version = "v3"
