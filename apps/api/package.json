@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "express": "^4.19.2",
-    "@blaze-cardano/sdk": "^0.7.2"
+    "@blaze-cardano/sdk": "^0.2.44"
   },
   "devDependencies": {
     "typescript": "^5.4.0",

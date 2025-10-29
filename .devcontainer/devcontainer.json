@@ -1,22 +1,52 @@
-// For format details, see https://aka.ms/devcontainer.json. For config options, see the
-// README at: https://github.com/devcontainers/templates/tree/main/src/ubuntu
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the README at:
+// https://github.com/devcontainers/templates/tree/main/src/ubuntu
 {
-	"name": "Ubuntu",
-	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
-	"image": "mcr.microsoft.com/devcontainers/base:noble"
-
-	// Features to add to the dev container. More info: https://containers.dev/features.
-	// "features": {},
-
-	// Use 'forwardPorts' to make a list of ports inside the container available locally.
-	// "forwardPorts": [],
-
-	// Use 'postCreateCommand' to run commands after the container is created.
-	// "postCreateCommand": "uname -a",
-
-	// Configure tool-specific properties.
-	// "customizations": {},
-
-	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
-	// "remoteUser": "root"
+	"name": "Cardano Starter (Node + Rust + Docker)",
+	// Base image (Ubuntu 24.04 "noble")
+	"image": "mcr.microsoft.com/devcontainers/base:noble",
+	// Preinstall common tooling via official Dev Container Features
+	"features": {
+		// Node.js LTS with build essentials for node-gyp
+		"ghcr.io/devcontainers/features/node:1": {
+			"version": "20",
+			"nodeGypDependencies": true
+		},
+		// pnpm package manager
+		"ghcr.io/devcontainers/features/pnpm:1": {
+			"version": "9"
+		},
+		// Rust toolchain for Aiken builds
+		"ghcr.io/devcontainers/features/rust:1": {
+			"version": "latest"
+		},
+		// Docker + Docker Compose inside the container (for Dolos/Kupo/Ogmios)
+		"ghcr.io/devcontainers/features/docker-in-docker:2": {}
+	},
+	// Forward commonly used ports (Next.js, API, Ogmios, Kupo, Dolos)
+	"forwardPorts": [
+		3000,
+		3001,
+		1337,
+		1442,
+		50051
+	],
+	// Environment in container
+	"containerEnv": {
+		"NEXT_TELEMETRY_DISABLED": "1"
+	},
+	// Recommended extensions and settings
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"esbenp.prettier-vscode",
+				"dbaeumer.vscode-eslint",
+				"ms-azuretools.vscode-docker",
+				"aiken-lang.aiken"
+			]
+		}
+	},
+	// After the container is created, ensure pnpm & npx are available, install deps, and install Aiken if missing
+	"postCreateCommand": "bash -lc 'pnpm -v && (command -v npx >/dev/null 2>&1 || npm i -g npx) && npx --version && pnpm install && (command -v aiken >/dev/null 2>&1 || cargo install aiken --locked)'",
+	// Use the non-root user provided by the base image for better file permissions
+	"remoteUser": "vscode"
 }

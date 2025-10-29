@@ -7,6 +7,7 @@
     "dev": "turbo dev",
     "test": "turbo test",
     "lint": "turbo lint",
+    "setup:container": "bash -lc 'set -e; (command -v corepack >/dev/null 2>&1 && corepack enable && corepack prepare pnpm@9 --activate) || true; pnpm -v || true; pnpm install || true; bash .devcontainer/scripts/install-aiken.sh'",
     "infra:up": "pnpm --filter @starter/dolos infra:up",
     "infra:down": "pnpm --filter @starter/dolos infra:down",
     "infra:logs": "pnpm --filter @starter/dolos infra:logs"
