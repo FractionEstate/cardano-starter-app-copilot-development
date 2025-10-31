@@ -1,5 +1,6 @@
 import { Router, type Request, type Response } from "express";
 import { getBlaze } from "../lib/blaze";
+import { getAddressBalance } from '../services/balance';
 import { buildUnsignedSendAda } from '../services/tx';
 
 const router = Router();
@@ -75,7 +76,7 @@ router.post('/txs/build/send-ada', async (req: Request, res: Response) => {
       return res.status(400).json({ success: false, error: 'Invalid lovelace amount' });
     }
 
-    // Prefer Kupmios (Ogmios + Kupo) when available; otherwise return 503
+    // Prefer Kupmios (Ogmios + Kupo). For now required for tx building.
     const info = await getBlaze();
     if (!(info.ogmiosReachable && info.kupoReachable)) {
       return res.status(503).json({ success: false, error: 'Kupmios (Ogmios + Kupo) not reachable' });
@@ -85,6 +86,23 @@ router.post('/txs/build/send-ada', async (req: Request, res: Response) => {
     return res.json({ success: true, unsignedCbor });
   } catch (error) {
     return res.status(500).json({ success: false, error: 'Failed to build transaction' });
+  }
+});
+
+// Address balance (lovelace) lookup
+router.get('/address/:address/balance', async (req: Request, res: Response) => {
+  try {
+    const { address } = req.params;
+    if (typeof address !== 'string' || !address.startsWith('addr')) {
+      return res.status(400).json({ success: false, error: 'Invalid address' });
+    }
+
+    const lovelace = await getAddressBalance(address);
+    return res.json({ success: true, lovelace: lovelace.toString() });
+  } catch (error) {
+    const msg = (error as Error)?.message || 'Failed to fetch balance';
+    const status = msg.includes('No reachable provider') ? 503 : 500;
+    return res.status(status).json({ success: false, error: msg });
   }
 });
 

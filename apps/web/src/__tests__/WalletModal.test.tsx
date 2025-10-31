@@ -26,6 +26,10 @@ describe('WalletModal', () => {
   });
 
   it('lists detected wallets and connects on click', async () => {
+    // Mock balance fetch to avoid errors during connect
+    // @ts-ignore
+    global.fetch = jest.fn(async () => ({ ok: true, json: async () => ({ success: true, lovelace: '0' }) })) as unknown as typeof fetch;
+
     // Stub CIP-30 for nami
     (global as any).window = (global as any).window || {};
     (global as any).window.cardano = {

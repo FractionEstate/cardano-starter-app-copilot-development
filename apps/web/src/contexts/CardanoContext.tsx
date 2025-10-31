@@ -13,7 +13,8 @@ interface InjectedWallet {
 }
 
 export interface CardanoContextValue {
-  readonly lucid: unknown | null;
+  // Kept for backwards compatibility; always null in no-WASM mode
+  readonly lucid: null;
   readonly address: string;
   readonly connected: boolean;
   readonly balance: bigint;
@@ -27,42 +28,22 @@ export interface CardanoContextValue {
 const CardanoContext = createContext<CardanoContextValue | null>(null);
 
 export const CardanoProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [lucid, setLucid] = useState<unknown | null>(null);
+  // No Lucid in no-WASM mode
   const [address, setAddress] = useState<string>("");
   const [connected, setConnected] = useState<boolean>(false);
   const [balance, setBalance] = useState<bigint>(0n);
   const [loadingBalance, setLoadingBalance] = useState<boolean>(false);
   const [walletApi, setWalletApi] = useState<Cip30Api | null>(null);
 
-  const attachLucidAndLoad = useCallback(async (api: Cip30Api): Promise<void> => {
-    try {
-      const { initLucid } = await import('../lib/lucid');
-      const instance = await initLucid();
-  // Select wallet via CIP-30 API
-  (instance as unknown as { selectWallet: { fromAPI: (api: Cip30Api) => void } }).selectWallet.fromAPI(api);
-      setLucid(instance as unknown);
-
-      // Prefer address from lucid now that wallet is selected
-  const addr: string = await (instance as unknown as { wallet: { address: () => Promise<string> } }).wallet.address();
-      setAddress(addr);
-
-      setLoadingBalance(true);
-      try {
-  const utxos = await (instance as unknown as { wallet: { getUtxos: () => Promise<unknown[]> } }).wallet.getUtxos();
-        const sum = utxos.reduce((acc: bigint, u: unknown) => {
-          const assets = (u as { assets?: { lovelace?: bigint } }).assets;
-          const lovelace = assets?.lovelace ?? 0n;
-          return acc + lovelace;
-        }, 0n);
-        setBalance(sum);
-      } finally {
-        setLoadingBalance(false);
-      }
-    } catch (e) {
-      // Lucid initialization is optional; fail silently but keep connection via CIP-30
-      // eslint-disable-next-line no-console
-      console.warn('Lucid init failed or unavailable; continuing with CIP-30 only');
+  const fetchBalance = useCallback(async (addr: string): Promise<bigint> => {
+    const apiUrl = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001').replace(/\/$/, '');
+    const res = await fetch(`${apiUrl}/cardano/address/${addr}/balance`);
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      throw new Error((body as any).error || `Failed to fetch balance (${res.status})`);
     }
+    const data = await res.json() as { lovelace: string };
+    return BigInt(data.lovelace);
   }, []);
 
   const connect = useCallback(async (walletKey: string): Promise<void> => {
@@ -77,28 +58,28 @@ export const CardanoProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setConnected(true);
     setAddress(addr);
     setWalletApi(api);
-    // Try to attach Lucid and load balance, non-fatal if it fails
-    await attachLucidAndLoad(api);
-  }, [attachLucidAndLoad]);
-
-  const refreshBalance = useCallback(async (): Promise<void> => {
-    if (!lucid) return;
+    // Load balance via API
+    setLoadingBalance(true);
     try {
-      setLoadingBalance(true);
-  const utxos = await (lucid as unknown as { wallet: { getUtxos: () => Promise<unknown[]> } }).wallet.getUtxos();
-      const sum = utxos.reduce((acc: bigint, u: unknown) => {
-        const assets = (u as { assets?: { lovelace?: bigint } }).assets;
-        const lovelace = assets?.lovelace ?? 0n;
-        return acc + lovelace;
-      }, 0n);
-      setBalance(sum);
+      const lovelace = await fetchBalance(addr);
+      setBalance(lovelace);
     } finally {
       setLoadingBalance(false);
     }
-  }, [lucid]);
+  }, [fetchBalance]);
+
+  const refreshBalance = useCallback(async (): Promise<void> => {
+    if (!address) return;
+    try {
+      setLoadingBalance(true);
+      const lovelace = await fetchBalance(address);
+      setBalance(lovelace);
+    } finally {
+      setLoadingBalance(false);
+    }
+  }, [address, fetchBalance]);
 
   const disconnect = useCallback((): void => {
-    setLucid(null);
     setAddress("");
     setConnected(false);
     setBalance(0n);
@@ -125,7 +106,7 @@ export const CardanoProvider: React.FC<{ children: React.ReactNode }> = ({ child
   }, [walletApi, address]);
 
   const value = useMemo<CardanoContextValue>(() => ({
-    lucid,
+    lucid: null,
     address,
     connected,
     balance,
@@ -134,7 +115,7 @@ export const CardanoProvider: React.FC<{ children: React.ReactNode }> = ({ child
     disconnect,
     refreshBalance,
     sendAda,
-  }), [lucid, address, connected, balance, loadingBalance, connect, disconnect, refreshBalance, sendAda]);
+  }), [address, connected, balance, loadingBalance, connect, disconnect, refreshBalance, sendAda]);
 
   return <CardanoContext.Provider value={value}>{children}</CardanoContext.Provider>;
 };

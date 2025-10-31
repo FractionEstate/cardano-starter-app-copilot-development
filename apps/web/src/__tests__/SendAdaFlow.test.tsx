@@ -4,13 +4,19 @@ import { CardanoProvider, useCardano } from '../contexts/CardanoContext';
 
 describe('sendAda WASM-free flow', () => {
   it('builds on server, signs and submits with wallet', async () => {
-    // Mock fetch for build endpoint
+    // Mock fetch for both balance and build endpoints
     const unsigned = 'a1b2c3';
     // @ts-ignore
-    global.fetch = jest.fn(async () => ({
-      ok: true,
-      json: async () => ({ success: true, unsignedCbor: unsigned })
-    })) as unknown as typeof fetch;
+    global.fetch = jest.fn(async (input: RequestInfo | URL) => {
+      const url = typeof input === 'string' ? input : (input as URL).toString();
+      if (url.includes('/txs/build/send-ada')) {
+        return { ok: true, json: async () => ({ success: true, unsignedCbor: unsigned }) } as any;
+      }
+      if (url.includes('/address/') && url.includes('/balance')) {
+        return { ok: true, json: async () => ({ success: true, lovelace: '1000000' }) } as any;
+      }
+      return { ok: false, json: async () => ({}) } as any;
+    }) as unknown as typeof fetch;
 
     // Mock CIP-30 wallet
     const signTx = jest.fn(async () => 'signedcbor');

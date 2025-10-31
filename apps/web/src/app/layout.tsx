@@ -6,7 +6,7 @@ import { Providers } from "./providers";
 
 export const metadata = {
   title: 'Cardano Starter',
-  description: 'Next.js + Lucid Evolution starter',
+  description: 'Next.js Cardano starter (no WASM on frontend)',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

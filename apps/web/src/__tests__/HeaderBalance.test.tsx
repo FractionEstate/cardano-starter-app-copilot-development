@@ -3,19 +3,6 @@ import userEvent from '@testing-library/user-event';
 import { Header } from '../components/header/Header';
 import { CardanoProvider } from '../contexts/CardanoContext';
 
-jest.mock('../lib/lucid', () => ({
-  initLucid: async () => ({
-    selectWallet: { fromAPI: jest.fn() },
-    wallet: {
-      address: async () => 'addr_test1qpxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-      getUtxos: async () => [
-        { assets: { lovelace: 3_000_000n } },
-        { assets: { lovelace: 2_500_000n } },
-      ],
-    },
-  }),
-}));
-
 describe('Header balance display', () => {
   afterEach(() => {
     // cleanup cardano stub
@@ -24,6 +11,10 @@ describe('Header balance display', () => {
   });
 
   it('shows ADA balance after connecting', async () => {
+    // Mock balance fetch
+    // @ts-ignore
+    global.fetch = jest.fn(async () => ({ ok: true, json: async () => ({ success: true, lovelace: '5500000' }) })) as unknown as typeof fetch;
+
     // Stub CIP-30 wallet
     (global as any).window = (global as any).window || {};
     (global as any).window.cardano = {
