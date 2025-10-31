@@ -11,7 +11,7 @@ export interface BlazeContext {
   readonly dolosRestUrl?: string;
   readonly dolosGrpcReachable: boolean; // best-effort only
   readonly dolosRestReachable: boolean; // base URL ping
-  readonly dolosRestHealthy: boolean;   // /api/v0/health
+  readonly dolosRestHealthy: boolean;   // /health
 }
 
 function getEnv(name: string): string | undefined {
@@ -66,7 +66,8 @@ export async function getBlaze(): Promise<BlazeContext> {
   const kupoUrl = withDefault(getEnv("KUPO_URL"), "http://localhost:1442");
   const dolosGrpcUrl = withDefault(getEnv("DOLOS_GRPC_URL"), "http://localhost:50051");
   const dolosRestUrl = withDefault(getEnv("DOLOS_REST_URL"), "http://localhost:4000");
-  const dolosRestHealthUrl = `${dolosRestUrl?.replace(/\/$/, "")}/api/v0/health`;
+  // Dolos minibf exposes a Blockfrost-like health endpoint at /health
+  const dolosRestHealthUrl = `${dolosRestUrl?.replace(/\/$/, "")}/health`;
 
   // Quick reachability checks (non-fatal)
   const [ogOk, kpOk, dgOk, drOk, drHealth] = await Promise.all([

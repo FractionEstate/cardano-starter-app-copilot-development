@@ -198,7 +198,7 @@ router.get("/dolos/health", async (_req: Request, res: Response) => {
   try {
     const ctx = await getBlaze();
     const base = ctx.dolosRestUrl ?? "http://localhost:4000";
-    const url = `${base.replace(/\/$/, "")}/api/v0/health`;
+    const url = `${base.replace(/\/$/, "")}/health`;
     const response = await fetch(url);
     if (!response.ok) {
       return res.status(response.status).json({ success: false, status: response.status });

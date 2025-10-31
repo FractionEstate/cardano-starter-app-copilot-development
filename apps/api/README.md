@@ -14,14 +14,14 @@ Environment variables:
 
 When running the local Dolos stack (packages/dolos), ensure you also have valid Ogmios/Kupo endpoints. The provided compose file is development-oriented; if Ogmios/Kupo are not backed by a synced node, they may restart.
 
-For hosted providers, set OGMIOS_URL and KUPO_URL to the provider URLs. For Dolos, ensure the REST endpoint is reachable; readiness uses `/api/v0/health`.
+For hosted providers, set OGMIOS_URL and KUPO_URL to the provider URLs. For Dolos, ensure the REST endpoint is reachable; readiness uses `/health`.
 
 ## Endpoints
 
 - GET /health          — basic liveness check
 - GET /cardano/status  — readiness + endpoint diagnostics
 - GET /cardano/dolos-status — Dolos-only readiness
-- GET /cardano/dolos/health — Proxy Dolos Blockfrost-like health (/api/v0/health)
+- GET /cardano/dolos/health — Proxy Dolos Blockfrost-like health (/health)
 
 Example response (/cardano/status):
 

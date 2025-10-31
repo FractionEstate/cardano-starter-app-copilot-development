@@ -37,6 +37,7 @@ Endpoints:
 
 - Dolos gRPC: http://localhost:50051
 - Dolos REST: http://localhost:4000
+	- Health: GET http://localhost:4000/health (returns {"is_healthy": true} when ready)
 
 API configuration (apps/api):
 

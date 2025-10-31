@@ -21,11 +21,11 @@ describe('GET /cardano/readiness', () => {
   });
 
   it('returns 200 when Dolos health is good even if Kupmios is down', async () => {
-    // Simulate Dolos health OK (for /api/v0/health), others not ok
+    // Simulate Dolos health OK (for /health), others not ok
     // @ts-ignore
     global.fetch = jest.fn(async (input: RequestInfo | URL) => {
       const url = typeof input === 'string' ? input : (input as URL).toString();
-      if (url.includes('/api/v0/health')) {
+      if (url.includes('/health')) {
         return { ok: true, status: 200, json: async () => ({ is_healthy: true }) } as any;
       }
       return { ok: false, status: 503 } as any;

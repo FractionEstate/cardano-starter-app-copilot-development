@@ -7,7 +7,7 @@ describe('GET /cardano/dolos/health', () => {
   app.use('/cardano', cardanoRouter);
 
   beforeEach(() => {
-    // Mock the chained calls: first to getBlaze() internals (ping), then to the Dolos REST /api/v0/health
+    // Mock the chained calls: first to getBlaze() internals (ping), then to the Dolos REST /health
     // Our route only uses fetch for the health call; getBlaze uses fetch too but we don't enforce it here).
     // Provide a default mock that returns ok JSON
     // @ts-ignore
