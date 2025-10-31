@@ -60,7 +60,8 @@ This returns JSON fields including `ready`, `ogmiosUrl`, `kupoUrl`, and Dolos he
 
 Backend provides endpoints under `/cardano`:
 
-- `GET /status` and `GET /dolos-status` — provider readiness
+- `GET /status` and `GET /dolos-status` — provider readiness (always HTTP 200; check body flags)
+- `GET /readiness` — strict readiness (HTTP 200 when ready, HTTP 503 otherwise)
 - `GET /address/:address/balance` — lovelace balance (Kupmios preferred; Dolos REST fallback)
 - `GET /address/:address/utxos` — UTxOs for address (Kupmios preferred; Dolos REST fallback)
 - `POST /txs/build/send-ada` — build unsigned ADA payment

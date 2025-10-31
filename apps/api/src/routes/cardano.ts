@@ -22,6 +22,10 @@ const bigintFromJSON = z.preprocess((v: unknown) => (
 ), z.bigint());
 const positiveBigint = bigintFromJSON.refine((v: bigint) => v > 0n, 'Amount must be > 0');
 const assetsRecord = z.record(z.string(), z.union([z.string(), z.number(), z.bigint()]));
+// Stricter schemas for mint/burn and signer hashes
+const policyIdSchema = z.string().regex(/^[0-9a-fA-F]{56}$/u, 'Invalid policyId (expected 56-hex)');
+const assetIdKey = z.string().regex(/^[0-9a-fA-F]{56}\.[0-9a-fA-F]+$/u, 'Invalid asset id key (<policy>.<assetHex>)');
+const strictAssetsRecord = z.record(assetIdKey, z.union([z.string(), z.number(), z.bigint()]));
 
 // Action schemas (loose but safe)
 const action_payLovelace = z.object({
@@ -54,7 +58,7 @@ const action_validity = z.object({
 });
 const action_requiredSigner = z.object({
   type: z.literal('requiredSigner'),
-  keyHash: z.string().min(4),
+  keyHash: z.string().regex(/^[0-9a-fA-F]{56}$/u, 'Invalid keyHash (expected 56-hex)'),
 });
 const action_changeAddress = z.object({
   type: z.literal('changeAddress'),
@@ -82,14 +86,14 @@ const action_spendUtxo = z.object({
 }).refine((v) => (v.txHash !== undefined && v.index !== undefined) || v.utxo !== undefined, { message: 'spendUtxo requires txHash/index or utxo' });
 const action_mint = z.object({
   type: z.literal('mint'),
-  policyId: z.string().min(20),
-  assets: assetsRecord,
+  policyId: policyIdSchema,
+  assets: strictAssetsRecord,
   redeemer: z.unknown().optional(),
 });
 const action_burn = z.object({
   type: z.literal('burn'),
-  policyId: z.string().min(20),
-  assets: assetsRecord,
+  policyId: policyIdSchema,
+  assets: strictAssetsRecord,
   redeemer: z.unknown().optional(),
 });
 const action_attachScript = z.object({
@@ -147,6 +151,17 @@ router.get("/status", async (_req: Request, res: Response) => {
     res.json({ success: true, ...ctx });
   } catch (error) {
     res.status(500).json({ success: false, error: (error as Error).message });
+  }
+});
+
+// Strict readiness suitable for probes: 200 when ready, 503 otherwise
+router.get("/readiness", async (_req: Request, res: Response) => {
+  try {
+    const ctx = await getBlaze();
+    const status = ctx.ready ? 200 : 503;
+    res.status(status).json({ success: ctx.ready, ...ctx });
+  } catch (error) {
+    res.status(503).json({ success: false, error: (error as Error).message });
   }
 });
 

@@ -58,7 +58,7 @@ describe('POST /cardano/txs/build (generic DSL)', () => {
           { type: 'payLovelace', toAddress: 'addr_test1qpto', lovelace: '2000000' },
           { type: 'metadata', label: 674, metadata: { msg: 'hello' } },
           { type: 'validity', validFrom: '100', validTo: '200' },
-          { type: 'requiredSigner', keyHash: 'abc123' },
+          { type: 'requiredSigner', keyHash: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' },
           { type: 'payMany', outputs: [
             { toAddress: 'addr_test1qqqq', lovelace: 1000000 },
             { toAddress: 'addr_test1wwwww', assets: { "policy.asset": 1 } }

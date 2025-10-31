@@ -35,6 +35,7 @@ export interface CardanoContextValue {
   refreshAddresses: () => Promise<void>;
   sendAda: (toAddress: string, lovelace: bigint) => Promise<string>;
   signMessage?: (message: string) => Promise<{ signature: string; key: string }>;
+  submitUnsignedCbor: (unsignedCbor: string) => Promise<string>;
 }
 
 const CardanoContext = createContext<CardanoContextValue | null>(null);
@@ -154,6 +155,12 @@ export const CardanoProvider: React.FC<{ children: React.ReactNode }> = ({ child
     return txHash;
   }, [walletApi, address]);
 
+  const submitUnsignedCbor = useCallback(async (unsignedCbor: string): Promise<string> => {
+    if (!walletApi) throw new Error('Wallet not connected');
+    const signed = await walletApi.signTx(unsignedCbor, false);
+    return walletApi.submitTx(signed);
+  }, [walletApi]);
+
   const signMessage = useCallback(async (message: string) => {
     if (!walletApi) throw new Error('Wallet not connected');
     if (typeof walletApi.signData !== 'function') throw new Error('Wallet does not support signData');
@@ -237,7 +244,8 @@ export const CardanoProvider: React.FC<{ children: React.ReactNode }> = ({ child
     refreshAddresses,
     sendAda,
     signMessage,
-  }), [address, connected, isConnecting, balance, loadingBalance, stakeAddress, usedAddresses, unusedAddresses, installedWallets, connect, disconnect, refreshBalance, refreshAddresses, sendAda, signMessage]);
+    submitUnsignedCbor,
+  }), [address, connected, isConnecting, balance, loadingBalance, stakeAddress, usedAddresses, unusedAddresses, installedWallets, connect, disconnect, refreshBalance, refreshAddresses, sendAda, signMessage, submitUnsignedCbor]);
 
   return <CardanoContext.Provider value={value}>{children}</CardanoContext.Provider>;
 };

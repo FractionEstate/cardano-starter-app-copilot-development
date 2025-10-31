@@ -27,5 +27,14 @@ export function getCardanoRateLimiter(): RequestHandler | null {
     standardHeaders: 'draft-7',
     legacyHeaders: false,
     message: { success: false, error: 'Too many requests' },
+    handler: (req, res, _next, options) => {
+      // Light logging outside of test environment; avoid sensitive data
+      if (process.env.NODE_ENV !== 'test') {
+        const ip = (req.headers['x-forwarded-for'] as string) || req.socket.remoteAddress || 'unknown';
+        // eslint-disable-next-line no-console
+        console.warn(`[rate-limit] 429 ${req.method} ${req.originalUrl} from ${ip}`);
+      }
+      res.status(options.statusCode).json(options.message as any);
+    },
   });
 }

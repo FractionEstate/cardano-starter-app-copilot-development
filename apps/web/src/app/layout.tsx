@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import React from "react";
+import { StatusBanner } from "../components/common/StatusBanner";
 import { Footer } from "../components/footer/Footer";
 import { Header } from "../components/header/Header";
 import './globals.css';
@@ -20,6 +21,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <Providers>
           <Header />
+          <StatusBanner />
           {children}
           <Footer />
         </Providers>
