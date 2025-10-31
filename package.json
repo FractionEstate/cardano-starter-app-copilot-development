@@ -13,7 +13,11 @@
     "infra:logs": "pnpm --filter @starter/dolos infra:logs"
   },
   "devDependencies": {
-    "typescript": "^5.4.0",
-    "turbo": "^2.1.0"
+    "turbo": "^2.1.0",
+    "typescript": "^5.4.0"
+  },
+  "dependencies": {
+    "express-rate-limit": "7",
+    "zod": "^4.1.12"
   }
 }

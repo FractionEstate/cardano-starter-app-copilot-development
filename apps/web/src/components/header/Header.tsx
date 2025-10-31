@@ -1,11 +1,14 @@
 "use client";
 import React, { useMemo, useState } from 'react';
 import { useCardano } from '../../hooks/useCardano';
+import { ConnectWalletButton } from '../wallet/ConnectWalletButton';
+import { WalletDetails } from '../wallet/WalletDetails';
 import { WalletModal } from '../wallet/WalletModal';
 
 export const Header: React.FC = (): JSX.Element => {
   const { connected, address, balance, loadingBalance, disconnect } = useCardano();
   const [open, setOpen] = useState(false);
+  const [showDetails, setShowDetails] = useState(false);
 
   // Listen for modal close event from WalletModal to avoid non-serializable function props
   React.useEffect(() => {
@@ -38,13 +41,19 @@ export const Header: React.FC = (): JSX.Element => {
             <div style={styles.connectedBox}>
               <span style={styles.addr} title={address}>{shortAddr}</span>
               <span style={styles.balance} title={`${balance} lovelace`}>{adaDisplay}</span>
+              <button style={styles.secondaryBtn} onClick={() => setShowDetails((s) => !s)} aria-pressed={showDetails} aria-label="Toggle wallet details">Details</button>
               <button style={styles.secondaryBtn} onClick={disconnect}>Disconnect</button>
             </div>
           ) : (
-            <button style={styles.primaryBtn} onClick={() => setOpen(true)}>Connect Wallet</button>
+            <ConnectWalletButton onClick={() => setOpen(true)} />
           )}
         </div>
       </div>
+      {connected && showDetails && (
+        <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 16px 12px' }}>
+          <WalletDetails />
+        </div>
+      )}
       <WalletModal open={open} />
     </header>
   );

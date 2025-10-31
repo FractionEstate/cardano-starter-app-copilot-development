@@ -13,18 +13,26 @@ jest.mock('@blaze-cardano/sdk', () => {
   const calls: Array<{ method: string; args: any[] }> = [];
   type B = {
     payLovelace: (addr: any, amt: bigint) => B;
+    payAssets: (addr: any, assets: any) => B;
     addMetadata: (label: number, md: any) => B;
     validFrom: (s: bigint) => B;
     validTo: (s: bigint) => B;
     addRequiredSigner: (k: string) => B;
+    registerStake: (s: string) => B;
+    deregisterStake: (s: string) => B;
+    withdrawRewards: (s: string, amt?: bigint) => B;
     complete: () => Promise<{ toCbor: () => string }>;
   };
   const builder: B = {
     payLovelace: jest.fn((addr: any, amt: bigint): B => { calls.push({ method: 'payLovelace', args: [addr, amt] }); return builder; }),
+    payAssets: jest.fn((addr: any, assets: any): B => { calls.push({ method: 'payAssets', args: [addr, assets] }); return builder; }),
     addMetadata: jest.fn((label: number, md: any): B => { calls.push({ method: 'addMetadata', args: [label, md] }); return builder; }),
     validFrom: jest.fn((s: bigint): B => { calls.push({ method: 'validFrom', args: [s] }); return builder; }),
     validTo: jest.fn((s: bigint): B => { calls.push({ method: 'validTo', args: [s] }); return builder; }),
     addRequiredSigner: jest.fn((k: string): B => { calls.push({ method: 'addRequiredSigner', args: [k] }); return builder; }),
+    registerStake: jest.fn((s: string): B => { calls.push({ method: 'registerStake', args: [s] }); return builder; }),
+    deregisterStake: jest.fn((s: string): B => { calls.push({ method: 'deregisterStake', args: [s] }); return builder; }),
+    withdrawRewards: jest.fn((s: string, amt?: bigint): B => { calls.push({ method: 'withdrawRewards', args: [s, amt] }); return builder; }),
     complete: jest.fn(async () => ({ toCbor: () => 'deadbeef' })),
   };
   return {
@@ -50,7 +58,15 @@ describe('POST /cardano/txs/build (generic DSL)', () => {
           { type: 'payLovelace', toAddress: 'addr_test1qpto', lovelace: '2000000' },
           { type: 'metadata', label: 674, metadata: { msg: 'hello' } },
           { type: 'validity', validFrom: '100', validTo: '200' },
-          { type: 'requiredSigner', keyHash: 'abc123' }
+          { type: 'requiredSigner', keyHash: 'abc123' },
+          { type: 'payMany', outputs: [
+            { toAddress: 'addr_test1qqqq', lovelace: 1000000 },
+            { toAddress: 'addr_test1wwwww', assets: { "policy.asset": 1 } }
+          ]},
+          { type: 'stakeRegister', stakeAddress: 'stake_test1uqq...' },
+          { type: 'withdrawRewards', stakeAddress: 'stake_test1uqq...', amount: '1000000' },
+          { type: 'stakeDeregister', stakeAddress: 'stake_test1uqq...' },
+          { type: 'feePolicy', strategy: 'auto', multiplier: 1.1 }
         ]
       });
 

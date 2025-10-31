@@ -44,6 +44,23 @@ export async function buildUnsignedFromDsl(fromAddress: string, actions: Readonl
 
   for (const action of actions) {
     switch (action.type) {
+      case 'payMany': {
+        const outputs = (action as any).outputs as ReadonlyArray<any> | undefined;
+        if (!Array.isArray(outputs) || outputs.length === 0) throw new Error('payMany requires non-empty outputs');
+        for (const out of outputs) {
+          const toAddr = String(out.toAddress);
+          const to = (Core as any).addressFromBech32(toAddr);
+          if (out.lovelace !== undefined) {
+            const lovelace = BigInt(String(out.lovelace));
+            builder = callAny(builder, ['payLovelace'], to, lovelace);
+          }
+          if (out.assets) {
+            const assets = out.assets as any;
+            builder = callAny(builder, ['payAssets', 'payTokens'], to, assets);
+          }
+        }
+        break;
+      }
       case 'payLovelace': {
         const toAddr = String(action.toAddress);
         const lovelace = BigInt(String(action.lovelace));
@@ -94,7 +111,8 @@ export async function buildUnsignedFromDsl(fromAddress: string, actions: Readonl
         break;
       }
       case 'changeAddress': {
-        const addr = (Core as any).addressFromBech32(String((action as any).address));
+        const bech = String((action as any).address ?? (action as any).changeAddress);
+        const addr = (Core as any).addressFromBech32(bech);
         builder = callAny(builder, ['changeAddress', 'setChangeAddress'], addr);
         break;
       }
@@ -115,8 +133,51 @@ export async function buildUnsignedFromDsl(fromAddress: string, actions: Readonl
         break;
       }
       case 'attachScript': {
-        const script = (action as any).script;
+        const script = (action as any).script ?? (action as any).scriptCbor;
         builder = callAny(builder, ['attachScript', 'attachSpendingValidator', 'attachMintingPolicy'], script);
+        break;
+      }
+      case 'stakeRegister': {
+        const stake = String((action as any).stakeAddress);
+        try {
+          builder = callAny(builder, ['registerStake', 'registerStakeKey', 'registerStakeCredential'], stake);
+        } catch (e) {
+          throw new Error('Stake registration not supported by current SDK');
+        }
+        break;
+      }
+      case 'stakeDeregister': {
+        const stake = String((action as any).stakeAddress);
+        try {
+          builder = callAny(builder, ['deregisterStake', 'deregisterStakeKey', 'deregisterStakeCredential'], stake);
+        } catch (e) {
+          throw new Error('Stake deregistration not supported by current SDK');
+        }
+        break;
+      }
+      case 'withdrawRewards': {
+        const stake = String((action as any).stakeAddress);
+        const amount = (action as any).amount;
+        const amt = amount !== undefined ? BigInt(String(amount)) : undefined;
+        try {
+          if (amt !== undefined) {
+            builder = callAny(builder, ['withdrawRewards', 'withdraw', 'withdrawReward'], stake, amt);
+          } else {
+            builder = callAny(builder, ['withdrawRewards', 'withdraw', 'withdrawReward'], stake);
+          }
+        } catch (e) {
+          throw new Error('Reward withdrawal not supported by current SDK');
+        }
+        break;
+      }
+      case 'feePolicy': {
+        // Best-effort: pass through to any recognized fee policy setter; ignore if unsupported
+        const hint = { ...(action as any) };
+        try {
+          builder = callAny(builder, ['setFee', 'feePolicy', 'setFeePolicy'], hint);
+        } catch {
+          // ignore optional hint
+        }
         break;
       }
       default:

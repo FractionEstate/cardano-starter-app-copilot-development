@@ -1,10 +1,11 @@
+import type { Metadata } from 'next';
 import React from "react";
 import { Footer } from "../components/footer/Footer";
 import { Header } from "../components/header/Header";
 import './globals.css';
 import { Providers } from "./providers";
 
-export const metadata = {
+export const metadata: Metadata = {
   title: 'Cardano Starter',
   description: 'Next.js Cardano starter (no WASM on frontend)',
 };
