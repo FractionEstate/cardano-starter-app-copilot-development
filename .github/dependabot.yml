@@ -10,3 +10,18 @@ updates:
    directory: "/"
    schedule:
      interval: weekly
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: weekly
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: weekly
+    allow:
+      - dependency-type: "direct"
+    ignore:
+      - dependency-name: "next"
+        versions: ["<15.0.0"]
+      - dependency-name: "typescript"
+        versions: ["<5.4.0"]

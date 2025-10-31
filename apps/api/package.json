@@ -7,19 +7,21 @@
     "dev": "tsx watch src/index.ts",
     "build": "tsc -p tsconfig.json",
     "start": "node dist/index.js",
-    "test": "jest"
+    "test": "jest --config ./jest.config.cjs"
   },
   "dependencies": {
-    "express": "^4.19.2",
-    "@blaze-cardano/sdk": "^0.2.44"
+    "@blaze-cardano/sdk": "^0.2.44",
+    "express": "^4.19.2"
   },
   "devDependencies": {
-    "typescript": "^5.4.0",
-    "tsx": "^4.16.2",
     "@types/express": "^4.17.21",
+    "@types/jest": "^29.5.12",
     "@types/node": "^20.11.30",
+    "@types/supertest": "^6.0.3",
     "jest": "^29.7.0",
+    "supertest": "^7.1.4",
     "ts-jest": "^29.1.1",
-    "@types/jest": "^29.5.12"
+    "tsx": "^4.16.2",
+    "typescript": "^5.4.0"
   }
 }

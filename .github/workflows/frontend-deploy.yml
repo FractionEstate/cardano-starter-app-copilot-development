@@ -4,13 +4,22 @@ on:
   push:
     paths:
       - "apps/web/**"
+      - "packages/shared/**"
+      - "turbo.json"
+      - "pnpm-lock.yaml"
   pull_request:
     paths:
       - "apps/web/**"
+      - "packages/shared/**"
+      - "turbo.json"
+      - "pnpm-lock.yaml"
 
 jobs:
-  build:
+  build_and_test:
     runs-on: ubuntu-latest
+    concurrency:
+      group: frontend-${{ github.ref }}
+      cancel-in-progress: true
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -23,5 +32,9 @@ jobs:
           cache: "pnpm"
       - name: Install deps
         run: pnpm install --frozen-lockfile
+      - name: Run unit tests (web)
+        run: pnpm --filter web test -- --ci
+        env:
+          CI: true
       - name: Build web
         run: pnpm --filter web build

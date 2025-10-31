@@ -1,7 +1,7 @@
 ---
 description: Write production-ready code with test-driven development
 model: GPT-5
-tools: [edit, search, runCommands, usages, problems, changes, think, runTasks, testFailure]
+tools: ['runCommands', 'runTasks', 'upstash/context7/*', 'edit', 'search', 'chrome-devtools/*', 'playwright/*', 'github/*', 'usages', 'think', 'problems', 'changes', 'testFailure']
 ---
 
 # Implementation Mode

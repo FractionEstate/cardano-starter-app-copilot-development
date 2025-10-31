@@ -11,10 +11,20 @@ on:
 jobs:
   aiken:
     runs-on: ubuntu-latest
+    concurrency:
+      group: aiken-${{ github.ref }}
+      cancel-in-progress: true
     steps:
       - uses: actions/checkout@v4
       - name: Setup Aiken
         uses: aiken-lang/setup-aiken@v1
+      - name: Cache Aiken build artifacts
+        uses: actions/cache@v4
+        with:
+          path: |
+            aiken/build
+            aiken/plutus.json
+          key: aiken-${{ hashFiles('aiken/**') }}
       - name: Aiken Check
         run: |
           cd aiken

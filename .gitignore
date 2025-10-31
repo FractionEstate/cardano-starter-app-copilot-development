@@ -1,3 +1,5 @@
+# .gitignore
+.turbo
 node_modules
 .pnp.cjs
 .pnpm-store
@@ -13,8 +15,6 @@ dist
 **/.DS_Store
 **/Thumbs.db
 packages/contracts/
-# .gitignore
-
 # Dependencies
 node_modules/
 .pnp

@@ -1,7 +1,7 @@
 ---
 description: Cardano backend development with Blaze SDK and Dolos node
 model: GPT-5
-tools: [edit, search, runCommands, usages, problems, changes, think, fetch]
+tools: ['runCommands', 'edit', 'search', 'todos', 'usages', 'think', 'problems', 'changes', 'fetch', 'githubRepo']
 ---
 
 # Cardano Backend Mode
