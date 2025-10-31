@@ -11,15 +11,23 @@ Important
 
 ```bash
 # From packages/dolos
-# 1) Download genesis JSON files for your network (example: preprod)
-curl -L -o config/genesis/byron.json   https://book.world.dev.cardano.org/snapshots/preprod/byron-genesis.json
-curl -L -o config/genesis/shelley.json https://book.world.dev.cardano.org/snapshots/preprod/shelley-genesis.json
-curl -L -o config/genesis/alonzo.json  https://book.world.dev.cardano.org/snapshots/preprod/alonzo-genesis.json
-curl -L -o config/genesis/conway.json  https://book.world.dev.cardano.org/snapshots/preprod/conway-genesis.json
+# 1) Provide genesis JSON files for your target network (example: preprod)
+#    Follow the official docs for up-to-date links:
+#    https://docs.txpipe.io/dolos/configuration/schema (genesis section)
+#    Or run the interactive initializer inside the container to set everything up:
+#    docker compose run --rm dolos dolos init
+#    (The compose mounts ./config read-write and enables TTY for this purpose.)
 
 # 2) Start Dolos (will use config/dolos.toml)
 docker compose up -d
 docker compose logs -f dolos
+
+# 3) (Optional) Bootstrap to speed up sync (choose one):
+#    Dolos Snapshot (full/ledger):
+#    docker compose run --rm dolos dolos bootstrap snapshot --variant ledger
+#    Mithril Snapshot (preprod example):
+#    docker compose run --rm dolos dolos bootstrap mithril \
+#      --aggregator https://aggregator.release-preprod.api.mithril.network/aggregator
 ```
 
 Bootstrap
@@ -50,4 +58,4 @@ The API route GET /cardano/status returns:
 }
 ```
 
-If using hosted providers, set OGMIOS_URL and KUPO_URL accordingly before starting the API. For Dolos, ensure the genesis files are present and configure `config/dolos.toml` for your network.
+If using hosted providers, set OGMIOS_URL and KUPO_URL accordingly before starting the API. For Dolos, ensure the genesis files are present (or run `dolos init` in the container), and configure `config/dolos.toml` for your network. See https://docs.txpipe.io/dolos for details.

@@ -19,16 +19,23 @@ alonzo_path = "/config/genesis/alonzo.json"
 conway_path = "/config/genesis/conway.json"
 
 [chain]
-type = "Cardano"
+type = "cardano"
 
 [chain.track]
 seen_addresses = true
 asset_state = true
+account_state = true
+drep_state = true
 pool_state = true
 pool_delegator = true
 epoch_state = true
 account_activity = true
 reward_logs = true
+proposal_logs = true
+tx_logs = true
+account_logs = true
+pool_logs = true
+epoch_logs = true
 
 [sync]
 pull_batch_size = 100

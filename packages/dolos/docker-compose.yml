@@ -1,13 +1,14 @@
-version: "3.8"
 services:
   dolos:
     image: ghcr.io/txpipe/dolos:latest
     container_name: dolos
     restart: unless-stopped
-    command: ["dolos", "daemon", "-c", "/config/dolos.toml"]
+    command: ["daemon", "-c", "/config/dolos.toml"]
+    tty: true
+    stdin_open: true
     ports:
       - "50051:50051" # gRPC
       - "4000:3000"    # REST (Blockfrost-like) mapped to host 4000
     volumes:
       - ./data:/data
-      - ./config:/config:ro
+      - ./config:/config
