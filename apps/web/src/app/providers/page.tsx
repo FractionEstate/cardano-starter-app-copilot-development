@@ -4,6 +4,9 @@ import React from 'react';
 export default function ProvidersPage(): JSX.Element {
   const [data, setData] = React.useState<any>(null);
   const [readiness, setReadiness] = React.useState<any>(null);
+  const [dolosStatus, setDolosStatus] = React.useState<any>(null);
+  const [dolosHealth, setDolosHealth] = React.useState<any>(null);
+  const [dolosVersion, setDolosVersion] = React.useState<any>(null);
   const [loading, setLoading] = React.useState<boolean>(true);
   const [error, setError] = React.useState<string | null>(null);
   const apiUrl = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001').replace(/\/$/, '');
@@ -11,13 +14,19 @@ export default function ProvidersPage(): JSX.Element {
   const load = React.useCallback(async () => {
     setLoading(true); setError(null);
     try {
-      const [s, r] = await Promise.all([
+      const [s, r, ds, dh, dv] = await Promise.all([
         fetch(`${apiUrl}/cardano/status`, { cache: 'no-store' }),
         fetch(`${apiUrl}/cardano/readiness`, { cache: 'no-store' }),
+        fetch(`${apiUrl}/cardano/dolos-status`, { cache: 'no-store' }),
+        fetch(`${apiUrl}/cardano/dolos/health`, { cache: 'no-store' }),
+        fetch(`${apiUrl}/cardano/dolos/version`, { cache: 'no-store' }),
       ]);
       const sj = await s.json().catch(() => ({}));
       const rj = await r.json().catch(() => ({}));
-      setData(sj); setReadiness(rj);
+      const dsj = await ds.json().catch(() => ({}));
+      const dhj = await dh.json().catch(() => ({}));
+  const dvj = await dv.json().catch(() => ({}));
+  setData(sj); setReadiness(rj); setDolosStatus(dsj); setDolosHealth(dhj); setDolosVersion(dvj);
     } catch (e) {
       setError((e as Error).message);
     } finally {
@@ -45,6 +54,22 @@ export default function ProvidersPage(): JSX.Element {
         <section>
           <h2>Readiness</h2>
           <pre aria-label="readiness-json" style={{ whiteSpace: 'pre-wrap', background: '#0f172a', color: '#e2e8f0', padding: 12, borderRadius: 8 }}>{JSON.stringify(readiness, null, 2)}</pre>
+        </section>
+      </div>
+      <div style={{ display: 'grid', gap: 12, gridTemplateColumns: '1fr 1fr', marginTop: 12 }}>
+        <section>
+          <h2>Dolos Status</h2>
+          <pre aria-label="dolos-status-json" style={{ whiteSpace: 'pre-wrap', background: '#0f172a', color: '#e2e8f0', padding: 12, borderRadius: 8 }}>{JSON.stringify(dolosStatus, null, 2)}</pre>
+        </section>
+        <section>
+          <h2>Dolos Health</h2>
+          <pre aria-label="dolos-health-json" style={{ whiteSpace: 'pre-wrap', background: '#0f172a', color: '#e2e8f0', padding: 12, borderRadius: 8 }}>{JSON.stringify(dolosHealth, null, 2)}</pre>
+        </section>
+      </div>
+      <div style={{ display: 'grid', gap: 12, gridTemplateColumns: '1fr', marginTop: 12 }}>
+        <section>
+          <h2>Dolos Version</h2>
+          <pre aria-label="dolos-version-json" style={{ whiteSpace: 'pre-wrap', background: '#0f172a', color: '#e2e8f0', padding: 12, borderRadius: 8 }}>{JSON.stringify(dolosVersion, null, 2)}</pre>
         </section>
       </div>
     </main>

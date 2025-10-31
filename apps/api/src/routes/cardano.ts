@@ -210,6 +210,23 @@ router.get("/dolos/health", async (_req: Request, res: Response) => {
   }
 });
 
+// Proxy Dolos REST version/info (root of minibf)
+router.get("/dolos/version", async (_req: Request, res: Response) => {
+  try {
+    const ctx = await getBlaze();
+    const base = ctx.dolosRestUrl ?? "http://localhost:4000";
+    const url = `${base.replace(/\/$/, "")}/`;
+    const response = await fetch(url);
+    if (!response.ok) {
+      return res.status(response.status).json({ success: false, status: response.status });
+    }
+    const json = await response.json().catch(() => ({}));
+    return res.json({ success: true, url, data: json });
+  } catch (error) {
+    return res.status(500).json({ success: false, error: (error as Error).message });
+  }
+});
+
 // Build unsigned transaction to send ADA (WASM-free frontend pattern)
 router.post('/txs/build/send-ada', async (req: Request, res: Response) => {
   try {

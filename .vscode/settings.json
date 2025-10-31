@@ -68,5 +68,8 @@
         "copilot/grok-code-fast-1"
       ]
     }
+  },
+  "[dockercompose]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
   }
 }
