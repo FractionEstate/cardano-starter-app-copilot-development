@@ -1,10 +1,10 @@
-name = "starter/validators"
-version = "1.0.0"
-author = "your-name"
+name = "fractionestate/validators"
+version = "0.1.0"
+author = "FractionEstate"
 
 [repository]
-user = "your-github"
-project = "cardano-starter"
+user = "FractionEstate"
+project = "cardano-starter-app-copilot-development"
 
 [plutus]
 version = "v3"

@@ -2,9 +2,9 @@
 
 A turnkey monorepo for Cardano dApp development:
 
-- Next.js 14 (frontend) + Lucid Evolution
+- Next.js 15 (frontend) + Lucid Evolution
 - Express (backend) + Blaze SDK
-- Dolos, Ogmios, Kupo (node + indexers)
+- Dolos (lightweight data node) — optional Kupmios (Ogmios + Kupo) if needed
 - Aiken (smart contracts)
 - Turborepo orchestration
 
@@ -17,30 +17,27 @@ A turnkey monorepo for Cardano dApp development:
 
 ## Quick Start
 
-```powershell
+```bash
 # 1) Copy env template
-Copy-Item .env.example .env
+cp .env.example .env
 
 # 2) Install deps (root)
 pnpm install
 
-# 3) Start node services (Dolos, Ogmios, Kupo)
-# Option A (recommended): via monorepo scripts
-pnpm infra:up
+# 3) Start Dolos (optional)
+# The repo provides a Dolos compose; Ogmios/Kupo are not started by default.
+pnpm infra:up                         # starts Dolos only (see packages/dolos)
 
-# Option B (manual): run from packages/dolos
-# cd packages/dolos; docker compose up -d; cd ../..
-
-# 4) Build all packages (includes Aiken)
+# 4) Build all packages (includes Aiken check/build)
 pnpm run build
 
-# 5) Dev servers (Next.js 3000 + API 3001)
+# 5) Run development servers (Next.js 3000 + API 3001)
 pnpm run dev
 ```
 
 ### Running without Docker (optional)
 
-If you don't want local containers, you can point the backend to hosted providers (e.g., Maestro, Blockfrost, Koios) or a remote Kupmios-compatible endpoint by setting the corresponding environment variables in `.env` and skipping `pnpm infra:up`.
+If you don't want local containers, point the backend to hosted providers (Maestro, Blockfrost, Koios) or a remote Kupmios-compatible endpoint by setting the corresponding environment variables in `.env` and skip `pnpm infra:up`.
 
 To stop the local infra:
 
@@ -52,24 +49,23 @@ pnpm infra:down
 
 Once the API is running:
 
-```powershell
+```bash
 # Check Cardano provider readiness and endpoints
-Invoke-WebRequest http://localhost:3001/cardano/status | Select-Object -ExpandProperty Content
+curl -s http://localhost:3001/cardano/status | jq .
 ```
 
-This returns a JSON with `ready`, `ogmiosUrl`, and `kupoUrl`. If you’re pointing to remote endpoints via `.env`, Docker isn’t required.
+This returns JSON fields including `ready`, `ogmiosUrl`, `kupoUrl`, and Dolos health if configured. If you’re pointing to remote endpoints via `.env`, Docker isn’t required.
 
 ## Aiken
 
-```powershell
+```bash
 cd aiken
-# Type check
- aiken check
-# Compile to Plutus
- aiken build
-# Property tests
- aiken test
+aiken check          # Type check
+aiken build          # Compile to Plutus
+aiken test           # Property tests
 ```
+
+Note: There are no default validators included. Create your own under `aiken/validators/`. See `aiken/README.md`.
 
 ## Folders
 
@@ -81,5 +77,5 @@ cd aiken
 
 ## Notes
 
-- Use Preprod network by default; switch via env vars in `.env`.
+- Preprod network by default; switch via env vars in `.env`.
 - For production: secure your mnemonics and API keys; never commit secrets.
