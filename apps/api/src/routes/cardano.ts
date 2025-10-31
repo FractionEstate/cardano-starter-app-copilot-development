@@ -2,6 +2,7 @@ import { Router, type Request, type Response } from "express";
 import { getBlaze } from "../lib/blaze";
 import { getAddressBalance } from '../services/balance';
 import { buildUnsignedSendAda } from '../services/tx';
+import { buildUnsignedFromDsl } from '../services/txBuilder';
 
 const router = Router();
 
@@ -107,3 +108,29 @@ router.get('/address/:address/balance', async (req: Request, res: Response) => {
 });
 
 export default router;
+
+// Generic transaction builder using Blaze; accepts a JSON DSL of actions
+router.post('/txs/build', async (req: Request, res: Response) => {
+  try {
+    const body = req.body ?? {};
+    const { fromAddress, actions } = body;
+    if (typeof fromAddress !== 'string' || !fromAddress.startsWith('addr')) {
+      return res.status(400).json({ success: false, error: 'Invalid fromAddress' });
+    }
+    if (!Array.isArray(actions) || actions.length === 0) {
+      return res.status(400).json({ success: false, error: 'No actions provided' });
+    }
+
+    // For building transactions, Kupmios (Ogmios+Kupo) must be reachable
+    const info = await getBlaze();
+    if (!(info.ogmiosReachable && info.kupoReachable)) {
+      return res.status(503).json({ success: false, error: 'Kupmios (Ogmios + Kupo) not reachable' });
+    }
+
+    const unsignedCbor = await buildUnsignedFromDsl(fromAddress, actions);
+    return res.json({ success: true, unsignedCbor });
+  } catch (error) {
+    const message = (error as Error)?.message || 'Failed to build transaction';
+    return res.status(400).json({ success: false, error: message });
+  }
+});
