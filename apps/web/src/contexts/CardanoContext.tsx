@@ -4,6 +4,8 @@ import React, { createContext, useCallback, useContext, useMemo, useState } from
 interface Cip30Api {
   getUsedAddresses: () => Promise<string[]>;
   getChangeAddress: () => Promise<string>;
+  signTx: (tx: string, partialSign: boolean) => Promise<string>;
+  submitTx: (signedTx: string) => Promise<string>;
 }
 
 interface InjectedWallet {
@@ -19,6 +21,7 @@ export interface CardanoContextValue {
   connect: (walletKey: string) => Promise<void>;
   disconnect: () => void;
   refreshBalance: () => Promise<void>;
+  sendAda: (toAddress: string, lovelace: bigint) => Promise<string>;
 }
 
 const CardanoContext = createContext<CardanoContextValue | null>(null);
@@ -29,6 +32,7 @@ export const CardanoProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [connected, setConnected] = useState<boolean>(false);
   const [balance, setBalance] = useState<bigint>(0n);
   const [loadingBalance, setLoadingBalance] = useState<boolean>(false);
+  const [walletApi, setWalletApi] = useState<Cip30Api | null>(null);
 
   const attachLucidAndLoad = useCallback(async (api: Cip30Api): Promise<void> => {
     try {
@@ -72,6 +76,7 @@ export const CardanoProvider: React.FC<{ children: React.ReactNode }> = ({ child
     const addr = used[0] ?? await api.getChangeAddress();
     setConnected(true);
     setAddress(addr);
+    setWalletApi(api);
     // Try to attach Lucid and load balance, non-fatal if it fails
     await attachLucidAndLoad(api);
   }, [attachLucidAndLoad]);
@@ -98,7 +103,26 @@ export const CardanoProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setConnected(false);
     setBalance(0n);
     setLoadingBalance(false);
+    setWalletApi(null);
   }, []);
+
+  const sendAda = useCallback(async (toAddress: string, lovelace: bigint): Promise<string> => {
+    if (!walletApi) throw new Error('Wallet not connected');
+    const apiUrl = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001').replace(/\/$/, '');
+    const res = await fetch(`${apiUrl}/cardano/txs/build/send-ada`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fromAddress: address, toAddress, lovelace: String(lovelace) })
+    });
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      throw new Error(body.error || `Failed to build tx (${res.status})`);
+    }
+    const data = await res.json() as { unsignedCbor: string };
+    const signed = await walletApi.signTx(data.unsignedCbor, false);
+    const txHash = await walletApi.submitTx(signed);
+    return txHash;
+  }, [walletApi, address]);
 
   const value = useMemo<CardanoContextValue>(() => ({
     lucid,
@@ -109,7 +133,8 @@ export const CardanoProvider: React.FC<{ children: React.ReactNode }> = ({ child
     connect,
     disconnect,
     refreshBalance,
-  }), [lucid, address, connected, balance, loadingBalance, connect, disconnect, refreshBalance]);
+    sendAda,
+  }), [lucid, address, connected, balance, loadingBalance, connect, disconnect, refreshBalance, sendAda]);
 
   return <CardanoContext.Provider value={value}>{children}</CardanoContext.Provider>;
 };

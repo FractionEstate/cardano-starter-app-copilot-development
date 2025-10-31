@@ -1,5 +1,6 @@
 import { Router, type Request, type Response } from "express";
 import { getBlaze } from "../lib/blaze";
+import { buildUnsignedSendAda } from '../services/tx';
 
 const router = Router();
 
@@ -55,6 +56,35 @@ router.get("/dolos/health", async (_req: Request, res: Response) => {
     return res.json({ success: true, url, data: json });
   } catch (error) {
     return res.status(500).json({ success: false, error: (error as Error).message });
+  }
+});
+
+// Build unsigned transaction to send ADA (WASM-free frontend pattern)
+router.post('/txs/build/send-ada', async (req: Request, res: Response) => {
+  try {
+    const { fromAddress, toAddress, lovelace } = req.body ?? {};
+
+    if (typeof fromAddress !== 'string' || !fromAddress.startsWith('addr')) {
+      return res.status(400).json({ success: false, error: 'Invalid fromAddress' });
+    }
+    if (typeof toAddress !== 'string' || !toAddress.startsWith('addr')) {
+      return res.status(400).json({ success: false, error: 'Invalid toAddress' });
+    }
+    const amount = typeof lovelace === 'string' ? BigInt(lovelace) : typeof lovelace === 'number' ? BigInt(lovelace) : null;
+    if (amount === null || amount <= 0n) {
+      return res.status(400).json({ success: false, error: 'Invalid lovelace amount' });
+    }
+
+    // Prefer Kupmios (Ogmios + Kupo) when available; otherwise return 503
+    const info = await getBlaze();
+    if (!(info.ogmiosReachable && info.kupoReachable)) {
+      return res.status(503).json({ success: false, error: 'Kupmios (Ogmios + Kupo) not reachable' });
+    }
+
+    const unsignedCbor = await buildUnsignedSendAda(fromAddress, toAddress, amount);
+    return res.json({ success: true, unsignedCbor });
+  } catch (error) {
+    return res.status(500).json({ success: false, error: 'Failed to build transaction' });
   }
 });
 

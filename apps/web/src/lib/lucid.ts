@@ -1,8 +1,8 @@
 // Utilities to initialize Lucid Evolution in the browser.
 // This module is only imported from client components.
-import { Koios, Lucid } from "@lucid-evolution/lucid";
 
-export type { LucidEvolution } from "@lucid-evolution/lucid";
+// Note: Avoid top-level imports from Lucid to prevent bundling WASM eagerly.
+// If you need the LucidEvolution type, import it at the usage site as a type-only import.
 
 const DEFAULTS = {
   Preprod: "https://preprod.koios.rest/api/v1",
@@ -16,6 +16,7 @@ export async function initLucid(
   networkEnv?: string,
   providerUrl?: string
 ) : Promise<ReturnType<typeof Lucid>> {
+  const { Koios, Lucid } = await import("@lucid-evolution/lucid");
   const network = (networkEnv as Network) || (process.env.NEXT_PUBLIC_NETWORK as Network) || "Preprod";
   const url = providerUrl || process.env.NEXT_PUBLIC_KOIOS_URL || DEFAULTS[network] || DEFAULTS.Preprod;
 
